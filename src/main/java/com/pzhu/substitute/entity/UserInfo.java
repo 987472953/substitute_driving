@@ -7,9 +7,8 @@ import java.util.Date;
 import java.io.Serializable;
 
 /**
- * (UserInfo)实体类
- *
- * @author makejava
+ * @author dengyiqing
+ * @description (UserInfo)实体类
  * @since 2022-01-11 16:51:27
  */
 @TableName(value = "user_info")

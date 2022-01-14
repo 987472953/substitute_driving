@@ -7,7 +7,7 @@ import java.util.Collection;
 
 /**
  * @author dengyiqing
- * @description TODO
+ * @description spring security 的用户登录类
  * @date 2022/1/11
  */
 public class LoginUser implements UserDetails {

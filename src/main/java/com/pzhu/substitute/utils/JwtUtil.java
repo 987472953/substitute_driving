@@ -13,7 +13,7 @@ import java.util.UUID;
 
 /**
  * @author dengyiqing
- * @description TODO
+ * @description JWT工具类
  * @date 2022/1/12
  */
 public class JwtUtil {

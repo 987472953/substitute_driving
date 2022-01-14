@@ -2,7 +2,7 @@ package com.pzhu.substitute.common;
 
 /**
  * @author dengyiqing
- * @description TODO
+ * @description 自定义业务异常
  * @date 2022/1/14
  */
 public class BizException extends RuntimeException {

@@ -4,15 +4,15 @@ import com.pzhu.substitute.common.Result;
 
 /**
  * @author dengyiqing
- * @description TODO
+ * @description 用户管理service
  * @date 2022/1/14
  */
 public interface UserService {
 
     /**
      *
-     * @param username
-     * @param password
+     * @param username 用户名
+     * @param password 密码
      * @return
      */
     Result login(String username, String password);

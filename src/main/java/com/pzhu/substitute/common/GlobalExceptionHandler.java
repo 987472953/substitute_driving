@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author dengyiqing
- * @description TODO
+ * @description 全局异常处理
  * @date 2022/1/14
  */
 @ControllerAdvice

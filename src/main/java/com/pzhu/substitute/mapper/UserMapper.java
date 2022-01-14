@@ -5,7 +5,7 @@ import com.pzhu.substitute.entity.UserInfo;
 
 /**
  * @author dengyiqing
- * @description TODO
+ * @description 用户管理dao
  * @date 2022/1/12
  */
 public interface UserMapper extends BaseMapper<UserInfo> {

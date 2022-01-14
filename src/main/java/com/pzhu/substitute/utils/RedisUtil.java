@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author dengyiqing
- * @description TODO
+ * @description Redis工具类(RedisTemplate)
  * @date 2022/1/14
  */
 public class RedisUtil {
