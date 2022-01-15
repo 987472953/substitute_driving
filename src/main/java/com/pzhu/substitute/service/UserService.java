@@ -18,4 +18,10 @@ public interface UserService extends IService<UserInfo> {
      * @return
      */
     Result login(String username, String password);
+
+    /**
+     * 退出登录
+     * @return
+     */
+    Result logout();
 }

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -64,5 +65,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         redisUtil.set(redisKey, principal);
 
         return Result.ok(map, "登录成功");
+    }
+
+    @Override
+    public Result logout() {
+        log.debug("[退出登录]获得SecurityContext中的用户Id");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+        String redisKey = CommonConstants.USER_PREFIX + loginUser.getUserInfo().getPhoneNum() + CommonConstants.LOGIN_SUFFIX;
+        redisUtil.del(redisKey);
+        return Result.ok().message("成功退出登录");
     }
 }
