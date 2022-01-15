@@ -6,7 +6,8 @@ package com.pzhu.substitute.common;
  * @date 2022/1/15
  */
 public interface CommonConstants {
-    String REQUEST_RESOURCES_PERMIT_ALL = "/user/login,/swagger-ui.html,/webjars/**,/swagger-resources/**,/v2/**";
+    String REQUEST_RESOURCES_PERMIT_ALL = "/swagger-ui.html,/webjars/**,/swagger-resources/**,/v2/**";
+    String REQUEST_ANONYMOUS = "/user/login";
 
     // Redis
     String USER_PREFIX = "user:";

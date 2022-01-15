@@ -51,7 +51,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebM
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers(CommonConstants.REQUEST_RESOURCES_PERMIT_ALL.split(",")).anonymous()
+                // 携带token(登录)就不能访问
+                .antMatchers(CommonConstants.REQUEST_ANONYMOUS.split(",")).anonymous()
+                // 都能访问
+                .antMatchers(CommonConstants.REQUEST_RESOURCES_PERMIT_ALL.split(",")).permitAll()
+                // 其他的都需要授权
                 .anyRequest().authenticated();
 
         log.debug("添加JWT过滤器到过滤链");
