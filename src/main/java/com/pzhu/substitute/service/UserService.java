@@ -1,13 +1,15 @@
 package com.pzhu.substitute.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.pzhu.substitute.common.Result;
+import com.pzhu.substitute.entity.UserInfo;
 
 /**
  * @author dengyiqing
  * @description 用户管理service
  * @date 2022/1/14
  */
-public interface UserService {
+public interface UserService extends IService<UserInfo> {
 
     /**
      *

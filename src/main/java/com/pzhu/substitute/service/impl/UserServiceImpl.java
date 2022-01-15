@@ -1,6 +1,8 @@
 package com.pzhu.substitute.service.impl;
 
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pzhu.substitute.common.BizException;
+import com.pzhu.substitute.common.CommonConstants;
 import com.pzhu.substitute.common.Result;
 import com.pzhu.substitute.common.ResultCode;
 import com.pzhu.substitute.entity.LoginUser;
@@ -27,7 +29,7 @@ import java.util.Objects;
  */
 @Service
 @Slf4j
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implements UserService {
 
     @Resource
     private UserMapper userMapper;
@@ -58,7 +60,8 @@ public class UserServiceImpl implements UserService {
         map.put("token", jwt);
 
         userInfo.setPassword(null);
-        redisUtil.set(userInfo.getPhoneNum(), userInfo);
+        String redisKey = CommonConstants.USER_PREFIX + userInfo.getPhoneNum() + CommonConstants.LOGIN_SUFFIX;
+        redisUtil.set(redisKey, principal);
 
         return Result.ok(map, "登录成功");
     }

@@ -2,9 +2,12 @@ package com.pzhu.substitute.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.activerecord.Model;
+import io.swagger.annotations.ApiModelProperty;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.Date;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author dengyiqing
@@ -12,7 +15,7 @@ import java.io.Serializable;
  * @since 2022-01-11 16:51:27
  */
 @TableName(value = "user_info")
-public class UserInfo implements Serializable {
+public class UserInfo extends Model<DriverInfo> implements Serializable {
     private static final long serialVersionUID = -54996581787580871L;
     /**
      * ID
@@ -43,17 +46,13 @@ public class UserInfo implements Serializable {
      * 性别
      */
     private Integer sex;
-    /**
-     * 年龄
-     */
+    @ApiModelProperty(value = "")
     private Integer age;
-    /**
-     * 创建日期
-     */
+    @ApiModelProperty(value = "创建日期", example = "2020-02-05 13:30:41")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss", iso = DateTimeFormat.ISO.DATE_TIME)
     private Date createTime;
-    /**
-     * 更新日期
-     */
+    @ApiModelProperty(value = "更新日期", example = "2020-02-05 13:30:41")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss", iso = DateTimeFormat.ISO.DATE_TIME)
     private Date updateTime;
 
 
