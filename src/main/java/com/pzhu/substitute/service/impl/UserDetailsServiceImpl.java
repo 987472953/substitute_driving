@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author dengyiqing
@@ -27,9 +28,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
+        log.debug("获得用户信息");
         LambdaQueryWrapper<UserInfo> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(UserInfo::getPhoneNum, username);
         UserInfo userInfo = userMapper.selectOne(wrapper);
-        return new LoginUser(userInfo);
+        log.debug("获得用户权限信息");
+        List<String> permissions = userMapper.queryPermissionsByUserId(userInfo.getId());
+        return new LoginUser(userInfo, permissions);
     }
 }

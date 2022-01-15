@@ -53,8 +53,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             throw new BizException(ResultCode.UNAUTHENTICATED);
         }
         log.debug("存入SecurityContextHolder");
-        // todo 第三个参数为权限信息
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginUser, null, null);
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         filterChain.doFilter(request, response);
     }
