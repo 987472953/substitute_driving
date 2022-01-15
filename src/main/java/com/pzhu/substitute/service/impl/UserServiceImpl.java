@@ -12,7 +12,6 @@ import com.pzhu.substitute.service.UserService;
 import com.pzhu.substitute.utils.JwtUtil;
 import com.pzhu.substitute.utils.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,9 +34,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
     @Resource
     private UserMapper userMapper;
 
-    @Value("${jwt.salt}")
-    private String jwtSalt;
-
     @Resource
     private AuthenticationManager authenticationManager;
 
@@ -54,7 +50,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         }
         LoginUser principal = (LoginUser) authenticate.getPrincipal();
         UserInfo userInfo = principal.getUserInfo();
-        String jwt = JwtUtil.createJWT(jwtSalt, -1, userInfo.getPhoneNum());
+        String jwt = JwtUtil.createJWT(CommonConstants.JWT_SALT, -1, userInfo.getPhoneNum());
         log.info("用户[{}]登录成功", userInfo.getPhoneNum());
 
         HashMap<String, String> map = new HashMap<>();

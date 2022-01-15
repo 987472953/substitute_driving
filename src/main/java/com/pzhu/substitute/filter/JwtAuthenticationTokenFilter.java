@@ -8,7 +8,6 @@ import com.pzhu.substitute.utils.JwtUtil;
 import com.pzhu.substitute.utils.RedisUtil;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -32,9 +31,6 @@ import java.util.Objects;
 @Slf4j
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
-    @Value("${jwt.salt}")
-    private String salt;
-
     @Resource
     private RedisUtil redisUtil;
 
@@ -45,7 +41,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        Claims claims = JwtUtil.parseJWT(salt, authentication);
+        Claims claims = JwtUtil.parseJWT(CommonConstants.JWT_SALT, authentication);
         String userId = claims.getSubject();
         String redisKey = CommonConstants.USER_PREFIX + userId + CommonConstants.LOGIN_SUFFIX;
         LoginUser loginUser = (LoginUser) redisUtil.get(redisKey);
