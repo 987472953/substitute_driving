@@ -11,6 +11,9 @@ public enum ResultCode {
     //---系统错误返回码-----
     FAIL(false, 10001, "操作失败"),
     LOGIN_FAIL(false, 4001, "登录失败"),
+    DISABLE(false, 4002, "用户被禁用"),
+    LOCKED(false, 4003, "用户被锁定"),
+    BAD_CREDENTIALS(false, 4004, "密码凭证错误"),
     UNAUTHENTICATED(false, 10002, "您还未登录"),
     UNAUTHORISE(false, 10003, "权限不足"),
     SERVER_ERROR(false, 99999, "抱歉，系统繁忙，请稍后重试！"),
