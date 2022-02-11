@@ -20,20 +20,35 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class UserDetailsServiceImpl<T> implements UserDetailsService {
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private DriverMapper driverMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         log.debug("获得用户信息");
-        LambdaQueryWrapper<UserInfo> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(UserInfo::getPhoneNum, username);
-        UserInfo userInfo = userMapper.selectOne(wrapper);
-        log.debug("获得用户权限信息");
-        List<String> permissions = userMapper.queryPermissionsByUserId(userInfo.getId());
-        return new LoginUser(userInfo, permissions);
+        String[] split = username.split(CommonConstants.SPLIT_REGEX);
+        if (split.length > 1) {
+            username = split[1];
+        }
+        if (CommonConstants.DRIVER_ROLE.equals(split[0])) {
+            LambdaQueryWrapper<DriverInfo> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(DriverInfo::getPhoneNum, username);
+            DriverInfo driverInfo = driverMapper.selectOne(wrapper);
+            List<String> permissions = driverMapper.queryPermissionsByDriverId(driverInfo.getId());
+            return new LoginDriver(driverInfo, permissions);
+        } else {
+            LambdaQueryWrapper<UserInfo> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(UserInfo::getPhoneNum, username);
+            UserInfo userInfo = userMapper.selectOne(wrapper);
+            log.debug("获得用户权限信息");
+            List<String> permissions = userMapper.queryPermissionsByUserId(userInfo.getId());
+            return new LoginUser(userInfo, permissions);
+        }
     }
 }
