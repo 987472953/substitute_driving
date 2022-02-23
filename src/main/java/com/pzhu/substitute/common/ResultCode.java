@@ -14,13 +14,17 @@ public enum ResultCode {
     CODE_INCORRECT(false, 4006, "验证码错误"),
     LOGIN_FAIL(false, 4002, "登录失败"),
     DISABLE(false, 4003, "用户被禁用"),
+    USER_DOES_NOT_EXIST(false, 4004, "用户不存在"),
     LOCKED(false, 4004, "用户被锁定"),
     BAD_CREDENTIALS(false, 4005, "密码凭证错误"),
     UNAUTHENTICATED(false, 10002, "您还未登录"),
+    JWT_EXPIRED(false, 10003, "您的登录已过期"),
     UNAUTHORISE(false, 10003, "权限不足"),
     SERVER_ERROR(false, 99999, "抱歉，系统繁忙，请稍后重试！"),
     BODY_NOT_MATCH(false, 4000, "请求的数据格式不符!"),
-    INTERNAL_SERVER_ERROR(false, 5000, "服务器内部错误!");
+    INTERNAL_SERVER_ERROR(false, 5000, "服务器内部错误!"),
+    REDIS_ERROR(false, 5001, "服务器缓存异常!"),
+    ORDER_EXPIRED(false, 4006, "订单过期");
 
     //---用户操作返回码----
     //---企业操作返回码----

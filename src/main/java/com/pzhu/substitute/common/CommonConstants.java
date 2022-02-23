@@ -27,6 +27,7 @@ public class CommonConstants {
     public static String DRIVER_ROLE = "driver";
 
     // Redis
+    public static final String ORDER_SUFFIX = ":tradeCode";
     public static final String USER_PREFIX = "user:";
     public static final String LOGIN_SUFFIX = ":login";
     public static final String REGISTER_CODE = "register:";
