@@ -1,5 +1,6 @@
 package com.pzhu.substitute.common;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -45,6 +46,20 @@ public class GlobalExceptionHandler {
     public Result exceptionHandler(HttpServletRequest req, NullPointerException e) {
         log.error("发生空指针异常！原因是:", e);
         return Result.error(ResultCode.BODY_NOT_MATCH);
+    }
+
+    /**
+     * 处理用户登录过期
+     *
+     * @param req
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = ExpiredJwtException.class)
+    @ResponseBody
+    public Result exceptionHandler(HttpServletRequest req, ExpiredJwtException e) {
+        log.error("jwt凭证过期:", e);
+        return Result.error(ResultCode.JWT_EXPIRED);
     }
 
     /**
