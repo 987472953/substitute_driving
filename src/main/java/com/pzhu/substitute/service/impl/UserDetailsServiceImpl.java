@@ -1,8 +1,12 @@
 package com.pzhu.substitute.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.pzhu.substitute.common.CommonConstants;
+import com.pzhu.substitute.entity.DriverInfo;
+import com.pzhu.substitute.entity.LoginDriver;
 import com.pzhu.substitute.entity.LoginUser;
 import com.pzhu.substitute.entity.UserInfo;
+import com.pzhu.substitute.mapper.DriverMapper;
 import com.pzhu.substitute.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;

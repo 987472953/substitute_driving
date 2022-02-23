@@ -1,6 +1,8 @@
 package com.pzhu.substitute.controller;
 
 import com.pzhu.substitute.common.Result;
+import com.pzhu.substitute.common.ResultCode;
+import com.pzhu.substitute.entity.LoginUser;
 import com.pzhu.substitute.entity.UserInfo;
 import com.pzhu.substitute.service.UserService;
 import io.swagger.annotations.Api;
@@ -8,6 +10,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -55,4 +59,19 @@ public class UserController {
     public Result logout() {
         return userService.logout();
     }
+
+    @GetMapping("detail")
+    @ApiOperation("获得用户基本信息")
+    public Result detail() {
+        Authentication authentication = SecurityContextHolder.getContext()
+                .getAuthentication();
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof LoginUser) {
+            UserInfo userInfo = ((LoginUser) principal).getUserInfo();
+            return Result.ok().data(userInfo);
+        } else {
+            return Result.error(ResultCode.UNAUTHENTICATED);
+        }
+    }
+
 }
