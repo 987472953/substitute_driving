@@ -3,15 +3,15 @@
 <mapper namespace="com.pzhu.substitute.mapper.UserMapper">
     <select id="queryPermissionsByUserId" resultType="java.lang.String">
         SELECT
-            DISTINCT `menu`.perm_key
+            DISTINCT ${prefix}menu.perm_key
         FROM
-            `user_role`
-                LEFT JOIN `role` ON role.id = user_role.role_id
-                LEFT JOIN `role_menu` ON user_role.role_id = role_menu.role_id
-                LEFT JOIN `menu` ON menu.id = role_menu.menu_id
+            ${prefix}user_role
+                LEFT JOIN ${prefix}role ON ${prefix}role.id = ${prefix}user_role.role_id
+                LEFT JOIN ${prefix}role_menu ON ${prefix}user_role.role_id = ${prefix}role_menu.role_id
+                LEFT JOIN ${prefix}menu ON ${prefix}menu.id = ${prefix}role_menu.menu_id
         WHERE
-            `user_role`.user_id = #{userId}
-          AND role.`status` = 1
-          AND `menu`.`status` = 1
+            ${prefix}user_role.user_id = #{userId}
+          AND ${prefix}role.status = 1
+          AND ${prefix}menu.status = 1
     </select>
 </mapper>
