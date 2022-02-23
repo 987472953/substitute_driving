@@ -18,3 +18,19 @@ spring:
         max-idle: 8
         min-idle: 0
 #    password:
+
+mybatis-plus:
+  global-config:
+    db-config:
+      table-prefix: pzhu_
+      # 逻辑删除配置
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  configuration-properties:
+    prefix: pzhu_
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  # 配置mapper xml文件的路径
+  mapper-locations: classpath:com/pzhu/substitute/mapper/xml/*.xml
+  # 枚举转换的包
+  type-enums-package: com.pzhu.substitute.common.status
