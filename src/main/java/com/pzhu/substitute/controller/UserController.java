@@ -32,9 +32,27 @@ public class UserController {
         return userService.login(user.getPhoneNum(), user.getPassword());
     }
 
+//    @GetMapping("login")
+//    @ApiOperation("微信登录")
+//    public Result login(String code){
+//        return userService.wxLogin();
+//    }
+
+    @PostMapping("register")
+    @ApiOperation("注册用户")
+    public Result register(String username, String password, String code) {
+        return userService.register(username, password, code);
+    }
+
+    @GetMapping("code")
+    @ApiOperation("获得二维码")
+    public Result code(String phoneNum) {
+        return userService.createCode(phoneNum);
+    }
+
     @GetMapping("logout")
     @ApiOperation("退出登录")
-    public Result logout(){
+    public Result logout() {
         return userService.logout();
     }
 }
