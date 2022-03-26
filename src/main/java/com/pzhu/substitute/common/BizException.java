@@ -56,16 +56,18 @@ public class BizException extends RuntimeException {
         return errorCode;
     }
 
-    public void setErrorCode(Integer errorCode) {
+    public BizException setErrorCode(Integer errorCode) {
         this.errorCode = errorCode;
+        return this;
     }
 
     public String getErrorMsg() {
         return errorMsg;
     }
 
-    public void setErrorMsg(String errorMsg) {
+    public BizException setErrorMsg(String errorMsg) {
         this.errorMsg = errorMsg;
+        return this;
     }
 
     public String getMessage() {

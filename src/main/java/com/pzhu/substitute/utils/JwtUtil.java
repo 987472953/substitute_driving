@@ -25,7 +25,7 @@ public class JwtUtil {
      * @param jwtSec    jwt秘钥 此秘钥一定要保留好在服务端, 不能暴露出去, 否则sign就可以被伪造, 如果对接多个客户端建议改造成多个
      * @param ttlMillis jwt过期时间(毫秒)
      * @param username  用户名 可根据需要传递的信息添加更多, 因为浏览器get传参url限制，不建议放置过多的参数
-     * @return
+     * @return 生存的JWT
      */
     public static String createJWT(String jwtSec, long ttlMillis, String username) {
         // 指定签名的时候使用的签名算法，也就是header那部分
@@ -52,7 +52,7 @@ public class JwtUtil {
                 .setSubject(username)
                 // 设置签名使用的签名算法和签名使用的秘钥
                 .signWith(signatureAlgorithm, jwtSec.getBytes(StandardCharsets.UTF_8));
-        if (ttlMillis >= 0) {
+        if (ttlMillis > 0) {
             long expMillis = nowMillis + ttlMillis;
             Date exp = new Date(expMillis);
             // 设置过期时间
@@ -67,7 +67,7 @@ public class JwtUtil {
      *
      * @param jwtSec jwt秘钥 此秘钥一定要保留好在服务端, 不能暴露出去, 否则sign就可以被伪造, 如果对接多个客户端建议改造成多个
      * @param token  加密后的token
-     * @return
+     * @return Claims对象
      */
     public static Claims parseJWT(String jwtSec, String token) {
         // 得到DefaultJwtParser

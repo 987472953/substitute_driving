@@ -463,7 +463,7 @@ public class RedisUtil {
      *
      * @param key   键
      * @param value 值
-     * @return
+     * @return 是否添加成功
      */
     public boolean lSet(String key, Object value) {
         try {

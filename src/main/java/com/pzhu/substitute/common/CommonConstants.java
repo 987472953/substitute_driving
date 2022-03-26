@@ -31,5 +31,12 @@ public class CommonConstants {
     public static final String USER_PREFIX = "user:";
     public static final String LOGIN_SUFFIX = ":login";
     public static final String REGISTER_CODE = "register:";
+    public static final String ORDER_LIST = "order:list";
+    public static final String LOGIN_IMAGE_CODE_PREFIX = "image:";
+    public static final String LOGIN_IMAGE_CODE_SUFFIX = ":code";
 
+    // 价格
+    public static final String PRICE_TO_PAY = "实际待支付价格";
+    public static final String DISTANCE_PRICE = "距离费用";
+    public static final String COUPON_DISCOUNT = "优惠券减免";
 }

@@ -2,6 +2,9 @@ package com.pzhu.substitute.common;
 
 import lombok.Data;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author dengyiqing
  * @description 统一返回结果
@@ -13,7 +16,7 @@ public class Result {
     private boolean success;//是否成功
     private Integer code;// 返回码
     private String message;//返回信息
-    private Object data;// 返回数据
+    private Map<String,Object> data = new HashMap<>();// 返回数据
 
     public Result(ResultCode code) {
         this.success = code.success;
@@ -21,7 +24,7 @@ public class Result {
         this.message = code.message;
     }
 
-    public Result(ResultCode code, Object data) {
+    public Result(ResultCode code, Map<String,Object> data) {
         this.success = code.success;
         this.code = code.code;
         this.message = code.message;
@@ -50,11 +53,11 @@ public class Result {
         return new Result(ResultCode.SUCCESS);
     }
 
-    public static Result ok(Object data) {
+    public static Result ok(Map<String,Object> data) {
         return new Result(ResultCode.SUCCESS, data);
     }
 
-    public static Result ok(Object data, String message) {
+    public static Result ok(Map<String,Object> data, String message) {
         return new Result(ResultCode.SUCCESS, data).message(message);
     }
 
@@ -62,8 +65,13 @@ public class Result {
         return new Result(resultCode);
     }
 
-    public Result data(Object data) {
+    public Result data(Map<String,Object> data) {
         this.setData(data);
+        return this;
+    }
+
+    public Result data(String key, Object value) {
+        this.data.put(key, value);
         return this;
     }
 
