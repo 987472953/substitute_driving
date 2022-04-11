@@ -27,7 +27,8 @@ public enum ResultCode {
     BODY_NOT_MATCH(false, 4000, "请求的数据格式不符!"),
     INTERNAL_SERVER_ERROR(false, 5000, "服务器内部错误!"),
     REDIS_ERROR(false, 5001, "服务器缓存异常!"),
-    ORDER_EXPIRED(false, 4006, "订单过期");
+    ORDER_EXPIRED(false, 4006, "订单过期"),
+    MQ_FAILED_CONSUME_MESSAGE(false, 40016, "消费者消息失败");
 
     //---用户操作返回码----
     //---企业操作返回码----

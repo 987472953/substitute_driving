@@ -25,13 +25,9 @@ public class HttpClientUtil {
     }
 
     public static String doGet(String url, Map<String, String> param) {
-
-        // 创建Httpclient对象
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-
         String resultString = "";
         CloseableHttpResponse response = null;
-        try {
+        try (CloseableHttpClient httpclient = HttpClients.createDefault()){
             // 创建uri
             URIBuilder builder = new URIBuilder(url);
             if (param != null) {
@@ -53,14 +49,13 @@ public class HttpClientUtil {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            try {
                 if (response != null) {
-                    response.close();
+                    try {
+                        response.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-                httpclient.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
         return resultString;
     }

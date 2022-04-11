@@ -1,7 +1,10 @@
 package com.pzhu.substitute.common;
 
+import com.pzhu.substitute.utils.MailUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
@@ -10,6 +13,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Date;
 
 /**
  * @author dengyiqing
@@ -19,6 +24,12 @@ import javax.servlet.http.HttpServletRequest;
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    @Autowired
+    private MailUtil mailUtil;
+
+    private Date email_limit_date;
+
 
     /**
      * 处理自定义的业务异常
@@ -102,7 +113,21 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public Result exceptionHandler(HttpServletRequest req, BadCredentialsException e) {
         log.error("用户名或密码错误:", e);
-        return Result.error(ResultCode.LOCKED).message("用户名或密码错误");
+        return Result.error(ResultCode.REDIS_ERROR).message("缓存连接异常, 请等待工作人员修复");
+    }
+
+    /**
+     * Redis连接异常
+     *
+     * @param req
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = RedisConnectionFailureException.class)
+    @ResponseBody
+    public Result exceptionHandler(HttpServletRequest req, RedisConnectionFailureException e) {
+        log.error("未知异常！原因是:", e);
+        return Result.error(ResultCode.INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -117,5 +142,27 @@ public class GlobalExceptionHandler {
     public Result exceptionHandler(HttpServletRequest req, Exception e) {
         log.error("未知异常！原因是:", e);
         return Result.error(ResultCode.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * 处理MQ异常
+     *
+     * @param req
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = MQException.class)
+    @ResponseBody
+    public Result exceptionHandler(HttpServletRequest req, MQException e) {
+        if (email_limit_date == null ||
+                new Date().getTime() - email_limit_date.getTime() > 30 * 60 * 1000) {
+            email_limit_date = new Date();
+            String infoText = "MQ消息队列 发生异常\nmessage: [%s]\ncause: [%s]\nstackTrace: \n%s";
+            String format = String.format(infoText, e.getMessage(), e.getCause(), Arrays.toString(e.getStackTrace()));
+            mailUtil.sendMessage("RocketMQ 异常", format, "987472953@qq.com");
+        }
+        log.error("消息队列异常, 原因是:", e);
+
+        return Result.error(ResultCode.MQ_FAILED_CONSUME_MESSAGE);
     }
 }

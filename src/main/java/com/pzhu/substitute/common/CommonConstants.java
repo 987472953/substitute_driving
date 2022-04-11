@@ -11,13 +11,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class CommonConstants {
     public static final String SPLIT_REGEX = ":";
+    public static final String REDIS_ORDER_LOCK = "redis:order:lock";
     public static String JWT_SALT;
     public static final String JWT_HEADER = "Authentication";
+    public static final String USER_DEFAULT_AVATAR = "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png";
 
 
     @Value("${constant.jwt.salt}")
     public void setJwtSalt(String salt) {
         CommonConstants.JWT_SALT = salt;
+    }
+
+    public static String MAIL_SENDER;
+
+    @Value("${spring.mail.username}")
+    public void setMailSender(String mailSender) {
+        CommonConstants.MAIL_SENDER = mailSender;
     }
 
     public static final String REQUEST_RESOURCES_PERMIT_ALL = "/swagger-ui.html,/webjars/**,/swagger-resources/**,/v2/**";
@@ -39,4 +48,7 @@ public class CommonConstants {
     public static final String PRICE_TO_PAY = "实际待支付价格";
     public static final String DISTANCE_PRICE = "距离费用";
     public static final String COUPON_DISCOUNT = "优惠券减免";
+
+    //mq
+    public static final String MQ_ORDER_TOPIC = "CREATE_ORDER_FAILED_TO_REDIS";
 }

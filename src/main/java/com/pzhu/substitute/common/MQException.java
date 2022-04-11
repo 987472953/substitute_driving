@@ -5,9 +5,9 @@ package com.pzhu.substitute.common;
  * @description 自定义业务异常
  * @date 2022/1/14
  */
-public class BizException extends RuntimeException {
+public class MQException extends RuntimeException {
 
-    private static final long serialVersionUID = 22501182174279719L;
+    private static final long serialVersionUID = 6049018190940560888L;
     /**
      * 错误码
      */
@@ -17,34 +17,34 @@ public class BizException extends RuntimeException {
      */
     protected String errorMsg;
 
-    public BizException() {
+    public MQException() {
         super();
     }
 
-    public BizException(ResultCode resultCode) {
+    public MQException(ResultCode resultCode) {
         super(resultCode.message);
         this.errorCode = resultCode.code;
         this.errorMsg = resultCode.message;
     }
 
-    public BizException(ResultCode resultCode, Throwable cause) {
+    public MQException(ResultCode resultCode, Throwable cause) {
         super(resultCode.message, cause);
         this.errorCode = resultCode.code;
         this.errorMsg = resultCode.message;
     }
 
-    public BizException(String errorMsg) {
+    public MQException(String errorMsg) {
         super(errorMsg);
         this.errorMsg = errorMsg;
     }
 
-    public BizException(Integer errorCode, String errorMsg) {
+    public MQException(Integer errorCode, String errorMsg) {
         super(errorMsg);
         this.errorCode = errorCode;
         this.errorMsg = errorMsg;
     }
 
-    public BizException(Integer errorCode, String errorMsg, Throwable cause) {
+    public MQException(Integer errorCode, String errorMsg, Throwable cause) {
         super(errorMsg, cause);
         this.errorCode = errorCode;
         this.errorMsg = errorMsg;
@@ -55,7 +55,7 @@ public class BizException extends RuntimeException {
         return errorCode;
     }
 
-    public BizException setErrorCode(Integer errorCode) {
+    public MQException setErrorCode(Integer errorCode) {
         this.errorCode = errorCode;
         return this;
     }
@@ -64,7 +64,7 @@ public class BizException extends RuntimeException {
         return errorMsg;
     }
 
-    public BizException setErrorMsg(String errorMsg) {
+    public MQException setErrorMsg(String errorMsg) {
         this.errorMsg = errorMsg;
         return this;
     }
@@ -79,3 +79,4 @@ public class BizException extends RuntimeException {
     }
 
 }
+

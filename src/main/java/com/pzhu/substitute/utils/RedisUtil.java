@@ -4,9 +4,7 @@ import lombok.NonNull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -18,8 +16,15 @@ public class RedisUtil {
 
     private RedisTemplate<String, Object> redisTemplate;
 
-    public void setRedisTemplate(RedisTemplate<String, Object> redisTemplate) {
+    private MailUtil mailUtil;
+
+    public static final String exceptionSubject = "Redis发生异常";
+    private final String infoText = "REDIS 发生异常\nmessage: [%s]\ncause: [%s]\nstackTrace: \n%s";
+    public static final String recipient = "987472953@qq.com";
+
+    public void setRedisTemplate(RedisTemplate<String, Object> redisTemplate, MailUtil mailUtil) {
         this.redisTemplate = redisTemplate;
+        this.mailUtil = mailUtil;
     }
     //=============================common============================
 
@@ -37,6 +42,8 @@ public class RedisUtil {
             }
             return true;
         } catch (Exception e) {
+            String format = String.format(infoText, e.getMessage(), e.getCause(), Arrays.toString(e.getStackTrace()));
+            mailUtil.sendMessage(exceptionSubject, format, recipient);
             e.printStackTrace();
             return false;
         }
@@ -62,6 +69,8 @@ public class RedisUtil {
         try {
             return redisTemplate.hasKey(key);
         } catch (Exception e) {
+            String format = String.format(infoText, e.getMessage(), e.getCause(), Arrays.toString(e.getStackTrace()));
+            mailUtil.sendMessage(exceptionSubject, format, recipient);
             e.printStackTrace();
             return false;
         }
@@ -107,6 +116,8 @@ public class RedisUtil {
             redisTemplate.opsForValue().set(key, value);
             return true;
         } catch (Exception e) {
+            String format = String.format(infoText, e.getMessage(), e.getCause(), Arrays.toString(e.getStackTrace()));
+            mailUtil.sendMessage(exceptionSubject, format, recipient);
             e.printStackTrace();
             return false;
         }
@@ -138,8 +149,8 @@ public class RedisUtil {
     /**
      * 递增
      *
-     * @param key 键
-     * @param delta  要增加几(大于0)
+     * @param key   键
+     * @param delta 要增加几(大于0)
      * @return
      */
     public long incr(String key, long delta) {
@@ -152,8 +163,8 @@ public class RedisUtil {
     /**
      * 递减
      *
-     * @param key 键
-     * @param delta  要减少几(小于0)
+     * @param key   键
+     * @param delta 要减少几(小于0)
      * @return
      */
     public long decr(String key, long delta) {
@@ -198,6 +209,8 @@ public class RedisUtil {
             redisTemplate.opsForHash().putAll(key, map);
             return true;
         } catch (Exception e) {
+            String format = String.format(infoText, e.getMessage(), e.getCause(), Arrays.toString(e.getStackTrace()));
+            mailUtil.sendMessage(exceptionSubject, format, recipient);
             e.printStackTrace();
             return false;
         }
@@ -219,10 +232,13 @@ public class RedisUtil {
             }
             return true;
         } catch (Exception e) {
+            String format = String.format(infoText, e.getMessage(), e.getCause(), Arrays.toString(e.getStackTrace()));
+            mailUtil.sendMessage(exceptionSubject, format, recipient);
             e.printStackTrace();
             return false;
         }
     }
+
 
     /**
      * 向一张hash表中放入数据,如果不存在将创建
@@ -237,6 +253,8 @@ public class RedisUtil {
             redisTemplate.opsForHash().put(key, item, value);
             return true;
         } catch (Exception e) {
+            String format = String.format(infoText, e.getMessage(), e.getCause(), Arrays.toString(e.getStackTrace()));
+            mailUtil.sendMessage(exceptionSubject, format, recipient);
             e.printStackTrace();
             return false;
         }
@@ -408,6 +426,7 @@ public class RedisUtil {
             return 0;
         }
     }
+
     //===============================list=================================
 
     /**
@@ -566,4 +585,43 @@ public class RedisUtil {
         }
     }
 
+
+    /**
+     * 加锁，无阻塞
+     *
+     * @param key
+     * @param expireTime
+     * @return
+     */
+    public Boolean lock(String key, long expireTime) {
+        String requestId = UUID.randomUUID().toString();
+        long start = System.currentTimeMillis();
+        //自旋，在一定时间内获取锁，超时则返回错误
+        for (; ; ) {
+            //Set命令返回OK，则证明获取锁成功
+            Boolean ret = redisTemplate.opsForValue().setIfAbsent(key, requestId, expireTime,
+                    TimeUnit.SECONDS);
+            if (ret == Boolean.TRUE) {
+                return true;
+            }
+            //否则循环等待，在timeout时间内仍未获取到锁，则获取失败
+            long end = System.currentTimeMillis() - start;
+            if (end >= 300L) {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * 释放锁
+     *
+     * @param lockKey
+     */
+    public void release(String lockKey) {
+        try {
+            redisTemplate.delete(lockKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

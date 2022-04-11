@@ -16,7 +16,7 @@ public class Result {
     private boolean success;//是否成功
     private Integer code;// 返回码
     private String message;//返回信息
-    private Map<String,Object> data = new HashMap<>();// 返回数据
+    private Map<Object, Object> data = new HashMap<>();// 返回数据
 
     public Result(ResultCode code) {
         this.success = code.success;
@@ -24,7 +24,7 @@ public class Result {
         this.message = code.message;
     }
 
-    public Result(ResultCode code, Map<String,Object> data) {
+    public Result(ResultCode code, Map<Object, Object> data) {
         this.success = code.success;
         this.code = code.code;
         this.message = code.message;
@@ -53,11 +53,11 @@ public class Result {
         return new Result(ResultCode.SUCCESS);
     }
 
-    public static Result ok(Map<String,Object> data) {
+    public static Result ok(Map<Object, Object> data) {
         return new Result(ResultCode.SUCCESS, data);
     }
 
-    public static Result ok(Map<String,Object> data, String message) {
+    public static Result ok(Map<Object, Object> data, String message) {
         return new Result(ResultCode.SUCCESS, data).message(message);
     }
 
@@ -65,7 +65,7 @@ public class Result {
         return new Result(resultCode);
     }
 
-    public Result data(Map<String,Object> data) {
+    public Result data(Map<Object, Object> data) {
         this.setData(data);
         return this;
     }

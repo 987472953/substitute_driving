@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.pzhu.substitute.utils.MailUtil;
 import com.pzhu.substitute.utils.RedisUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,9 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.mail.javamail.JavaMailSender;
+
+import javax.annotation.Resource;
 
 /**
  * @author dengyiqing
@@ -23,6 +27,18 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
+    @Resource
+    private JavaMailSender javaMailSender;
+
+    @Bean
+    public MailUtil mailUtil(){
+        MailUtil mailUtil = new MailUtil();
+        mailUtil.setJavaMailSender(javaMailSender);
+        return mailUtil;
+    }
+
+    @Resource
+    private MailUtil mailUtil;
 
     @Bean
     public RedisUtil redisUtil(RedisConnectionFactory redisConnectionFactory){
@@ -56,7 +72,9 @@ public class RedisConfig {
         redisTemplate.afterPropertiesSet();
 
         RedisUtil redisUtil = new RedisUtil();
-        redisUtil.setRedisTemplate(redisTemplate);
+        redisUtil.setRedisTemplate(redisTemplate, mailUtil);
         return redisUtil;
     }
+
+
 }
