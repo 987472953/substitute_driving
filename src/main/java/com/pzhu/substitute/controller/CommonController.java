@@ -3,10 +3,12 @@ package com.pzhu.substitute.controller;
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.pzhu.substitute.common.CommonConstants;
 import com.pzhu.substitute.common.Result;
+import com.pzhu.substitute.service.CommonService;
 import com.pzhu.substitute.utils.RedisUtil;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.imageio.ImageIO;
@@ -22,8 +24,9 @@ import java.io.ByteArrayOutputStream;
  * @date 2022/3/26
  */
 @RestController
-@Api(value = "验证码管理", tags = {"验证码工具接口"})
-public class KaptchaController {
+@RequestMapping("common")
+@Api(value = "通用接口管理", tags = {"通用接口"})
+public class CommonController {
     /**
      * 验证码工具
      */
@@ -32,6 +35,16 @@ public class KaptchaController {
 
     @Autowired
     private RedisUtil redisUtil;
+
+    @Autowired
+    private CommonService commonService;
+
+
+    @GetMapping("code")
+    public Result getPhoneCode(String uuid, String code, String phoneNum){
+        commonService.checkLoginCode(uuid, code);
+        return commonService.createCode(phoneNum);
+    }
 
     @GetMapping("/kaptcha/sessionId")
     public Result sessionId(HttpServletRequest request) {
