@@ -2,23 +2,25 @@ package com.pzhu.substitute.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.api.ApiController;
-import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.common.collect.ImmutableMap;
 import com.pzhu.substitute.common.Result;
 import com.pzhu.substitute.common.ResultCode;
 import com.pzhu.substitute.entity.LoginUser;
 import com.pzhu.substitute.entity.Order;
 import com.pzhu.substitute.entity.dto.OrderDTO;
+import com.pzhu.substitute.entity.dto.OrderPriceDTO;
 import com.pzhu.substitute.service.OrderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author dengyiqing
@@ -28,6 +30,7 @@ import java.util.List;
 @RestController
 @Api(tags = "订单表(Order)")
 @RequestMapping("order")
+@Slf4j
 public class OrderController extends ApiController {
     /**
      * 服务对象
@@ -35,48 +38,54 @@ public class OrderController extends ApiController {
     @Resource
     private OrderService orderService;
 
-
-    @PostMapping("trade")
-    @ApiOperation("草稿订单")
-    public Result trace(@RequestBody OrderDTO orderDTO, Authentication authentication){
-        LoginUser principal =(LoginUser) authentication.getPrincipal();
+    @PostMapping("calPrice")
+    @ApiOperation("预估价格")
+    public Result calPrice(@RequestBody OrderPriceDTO orderPriceDTO, Authentication authentication) {
+        LoginUser principal = (LoginUser) authentication.getPrincipal();
         String username = principal.getUsername();
-        //计算总价格
-        orderService.createTradeOrder(principal.getUserInfo(), orderDTO);
-        /**
-         * 流程 第一个接口将 user 为key uuid 为value的值存入redis 将uuid返回
-         * 另一个接口提交订单时需要传入uuid, 保存订单之前需要判断这个uuid是否在redis中,不在则为过期
-         */
+
+        Map<String, Double> map = orderService.calculateThePrice(principal.getUserInfo(), orderPriceDTO);
         //防止重复提交
-        return orderService.getTradeNo(username);
+        String tradeNo = orderService.getTradeNo(username);
+        ImmutableMap<Object, Object> of = ImmutableMap.of("priceInfo", map, "tradeNo", tradeNo);
+        return Result.ok().data(of);
     }
 
     @PostMapping("submitOrder")
     @ApiOperation("提交订单")
-    public Result submitOrder(String tradeNo, HttpServletRequest request){
-        String userId = (String) request.getAttribute("userId");
-        boolean canSubmit = orderService.checkTradeNo(userId, tradeNo);
-        if (canSubmit){
-            //todo 改状态
-//           return orderService.submitOrder(tradeNo);
-           orderService.delTradeNo(userId);
-        }else{
+    public Result submitOrder(@RequestBody OrderDTO orderDTO, String tradeNo, Authentication authentication) {
+        LoginUser principal = (LoginUser) authentication.getPrincipal();
+        String username = principal.getUsername();
+        boolean canSubmit = orderService.checkTradeNo(username, tradeNo);
+        if (!canSubmit) {
             return Result.error(ResultCode.ORDER_EXPIRED);
         }
-        return Result.error(ResultCode.ORDER_EXPIRED);
+        Long orderId = orderService.createTradeOrder(principal.getUserInfo(), orderDTO);
+        orderService.delTradeNo(username);
+        return Result.ok().data("orderId", orderId);
+    }
+
+    @GetMapping("iOrders")
+    @ApiOperation("查询我的全部订单")
+    public Result iOrders(Authentication authentication) {
+        LoginUser principal = (LoginUser) authentication.getPrincipal();
+        String username = principal.getUsername();
+        List<Order> orders = orderService.queryMyOrders(username);
+        return Result.ok().data("orders", orders);
     }
 
     /**
      * 分页查询所有数据
      *
-     * @param page 分页对象
+     * @param page  分页对象
      * @param order 查询实体
      * @return 所有数据
      */
     @GetMapping("/selectAll")
     @ApiOperation(value = "分页查全部")
-    public R selectAll(Page<Order> page, @ApiParam Order order) {
-        return success(this.orderService.page(page, new QueryWrapper<>(order)));
+    public Result selectAll(Page<Order> page, @ApiParam Order order) {
+        Page<Order> pageInfo = orderService.page(page, new QueryWrapper<>(order));
+        return Result.ok().data("pageInfo", pageInfo);
     }
 
     /**
@@ -87,44 +96,9 @@ public class OrderController extends ApiController {
      */
     @GetMapping("{id}")
     @ApiOperation(value = "根据id查")
-    public R selectOne(@PathVariable("id") Integer id) {
-        return success(this.orderService.getById(id));
-    }
-
-    /**
-     * 新增数据
-     *
-     * @param order 实体对象
-     * @return 新增结果
-     */
-    @PostMapping("/add")
-    @ApiOperation(value = "添加")
-    public R insert(@RequestBody @ApiParam Order order) {
-        return success(this.orderService.save(order));
-    }
-
-    /**
-     * 修改数据
-     *
-     * @param order 实体对象
-     * @return 修改结果
-     */
-    @PutMapping("/update")
-    @ApiOperation(value = "更新")
-    public R update(@RequestBody @ApiParam Order order) {
-        return success(this.orderService.updateById(order));
-    }
-
-    /**
-     * 删除数据
-     *
-     * @param idList 主键结合
-     * @return 删除结果
-     */
-    @DeleteMapping("/del")
-    @ApiOperation(value = "删除")
-    public R delete(@RequestParam("idList") @ApiParam List<Integer> idList) {
-        return success(this.orderService.removeByIds(idList));
+    public Result selectOne(@PathVariable("id") Integer id) {
+        Order byId = orderService.getById(id);
+        return Result.ok().data("order", byId);
     }
 }
 

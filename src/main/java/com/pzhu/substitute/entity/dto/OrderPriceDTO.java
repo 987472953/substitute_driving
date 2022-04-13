@@ -8,18 +8,18 @@ import java.io.Serializable;
 
 /**
  * @author dengyiqing
- * @description 订单dto
- * @date 2022/2/15
+ * @description 订单预计价格dto
+ * @date 2022/3/19
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderDTO implements Serializable {
-    private static final long serialVersionUID = 122222;
+public class OrderPriceDTO implements Serializable {
+    private static final long serialVersionUID = 11;
     private String startPoint;
     private String endPoint;
     private String startAddress;
     private String endAddress;
     private Integer distance;
-    private String comment;
+    private Integer duration;
 }

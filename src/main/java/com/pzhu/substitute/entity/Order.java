@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -22,21 +23,17 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @ApiModel("订单表")
+@ToString
 public class Order extends Model<Order> implements Serializable {
     private static final long serialVersionUID = -53314457093416446L;
 
     @ApiModelProperty("ID")
-    @TableId(type = IdType.AUTO)
-    private Integer id;
+    @TableId(type = IdType.ASSIGN_UUID)
+    private Long id;
 
-    /**
-     * 0：草稿
-     * 1：订单已创建
-     * 2：订单已发布
-     * 3：订单被分配
-     * 5：订单已完成
-     * 9：订单已取消
-     */
+    @ApiModelProperty("订单手机号")
+    private String orderPhone;
+
     @ApiModelProperty("订单状态")
     private OrderStatus orderStatus;
 
@@ -73,5 +70,9 @@ public class Order extends Model<Order> implements Serializable {
     @ApiModelProperty("下订单时间")
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private Date createTime;
+
+    @ApiModelProperty("订单修改时间")
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
+    private Date update_time;
 }
 
