@@ -3,13 +3,13 @@ package com.pzhu.substitute.filter;
 import com.pzhu.substitute.common.BizException;
 import com.pzhu.substitute.common.CommonConstants;
 import com.pzhu.substitute.common.ResultCode;
-import com.pzhu.substitute.entity.LoginUser;
 import com.pzhu.substitute.utils.JwtUtil;
 import com.pzhu.substitute.utils.RedisUtil;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -42,14 +42,19 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             return;
         }
         Claims claims = JwtUtil.parseJWT(CommonConstants.JWT_SALT, authentication);
-        String userId = claims.getSubject();
-        String redisKey = CommonConstants.USER_PREFIX + userId + CommonConstants.LOGIN_SUFFIX;
-        LoginUser loginUser = (LoginUser) redisUtil.get(redisKey);
-        if (Objects.isNull(loginUser)) {
+        String phoneNum = claims.getSubject();
+        String redisKey;
+        if (CommonConstants.USER_ROLE.equals(claims.get("role"))) {
+            redisKey = CommonConstants.USER_PREFIX + phoneNum + CommonConstants.LOGIN_SUFFIX;
+        } else {
+            redisKey = CommonConstants.DRIVER_PREFIX + phoneNum + CommonConstants.LOGIN_SUFFIX;
+        }
+        UserDetails login = (UserDetails) redisUtil.get(redisKey);
+        if (Objects.isNull(login)) {
             throw new BizException(ResultCode.UNAUTHENTICATED);
         }
         log.debug("存入SecurityContextHolder");
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(login, null, login.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         filterChain.doFilter(request, response);
     }

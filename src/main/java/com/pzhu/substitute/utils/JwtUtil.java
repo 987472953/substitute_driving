@@ -27,7 +27,7 @@ public class JwtUtil {
      * @param username  用户名 可根据需要传递的信息添加更多, 因为浏览器get传参url限制，不建议放置过多的参数
      * @return 生存的JWT
      */
-    public static String createJWT(String jwtSec, long ttlMillis, String username) {
+    public static String createJWT(String jwtSec, long ttlMillis, String username, String role) {
         // 指定签名的时候使用的签名算法，也就是header那部分
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
@@ -38,6 +38,7 @@ public class JwtUtil {
         // 创建payload的私有声明（根据特定的业务需要添加）
         Map<String, Object> claims = new HashMap<>();
         claims.put("username", username);
+        claims.put("role", role);
 
         // 添加payload声明
         // 设置jwt的body

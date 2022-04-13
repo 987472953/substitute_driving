@@ -69,7 +69,7 @@ public class LoginUser implements UserDetails {
     @Override
     @JsonIgnore
     public boolean isAccountNonLocked() {
-        return true;
+        return !userInfo.getLocked();
     }
 
     @Override
@@ -81,6 +81,6 @@ public class LoginUser implements UserDetails {
     @Override
     @JsonIgnore
     public boolean isEnabled() {
-        return true;
+        return userInfo.getEnabled();
     }
 }
