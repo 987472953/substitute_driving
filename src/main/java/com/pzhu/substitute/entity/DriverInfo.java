@@ -41,9 +41,18 @@ public class DriverInfo extends Model<DriverInfo> implements Serializable {
     @ApiModelProperty("身份证")
     private String idCard;
             
-    @ApiModelProperty("驾驶证")
+    @ApiModelProperty("驾驶证图片")
     private String driverLicense;
-            
+
+    @ApiModelProperty("年龄")
+    private Integer age;
+
+    @ApiModelProperty(value = "是否被锁定")
+    private Boolean locked;
+
+    @ApiModelProperty(value = "是否被启用")
+    private Boolean enabled;
+
     @ApiModelProperty("创建时间")
     private Date createTime;
             

@@ -13,13 +13,14 @@ import java.util.stream.Collectors;
 
 /**
  * @author dengyiqing
- * @description TODO
+ * @description 驾驶员登录
  * @date 2022/1/18
  */
 @Data
 @NoArgsConstructor
 public class LoginDriver implements UserDetails {
 
+    private static final long serialVersionUID = 4636703231606879084L;
     private DriverInfo driverInfo;
 
     private List<String> permissions;

@@ -39,6 +39,7 @@ public class CommonConstants {
     public static final String ORDER_SUFFIX = ":tradeCode";
     public static final String USER_PREFIX = "user:";
     public static final String LOGIN_SUFFIX = ":login";
+    public static final String DRIVER_PREFIX = "driver:";
     public static final String REGISTER_CODE = "register:";
     public static final String ORDER_LIST = "order:list";
     public static final String LOGIN_IMAGE_CODE_PREFIX = "image:";
