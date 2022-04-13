@@ -30,18 +30,21 @@ public class CommonController {
     /**
      * 验证码工具
      */
-    @Autowired
-    DefaultKaptcha defaultKaptcha;
+    private final DefaultKaptcha defaultKaptcha;
+
+    private final RedisUtil redisUtil;
+
+    private final CommonService commonService;
 
     @Autowired
-    private RedisUtil redisUtil;
-
-    @Autowired
-    private CommonService commonService;
-
+    public CommonController(DefaultKaptcha defaultKaptcha, RedisUtil redisUtil, CommonService commonService) {
+        this.defaultKaptcha = defaultKaptcha;
+        this.redisUtil = redisUtil;
+        this.commonService = commonService;
+    }
 
     @GetMapping("code")
-    public Result getPhoneCode(String uuid, String code, String phoneNum){
+    public Result getPhoneCode(String uuid, String code, String phoneNum) {
         commonService.checkLoginCode(uuid, code);
         return commonService.createCode(phoneNum);
     }

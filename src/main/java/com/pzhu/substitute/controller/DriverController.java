@@ -37,23 +37,22 @@ import java.util.Map;
 @Api(value = "驾驶员模块", tags = {"驾驶员操作接口"})
 @Slf4j
 public class DriverController {
-    @Autowired
-    private MailUtil mailUtil;
+    private final MailUtil mailUtil;
+    private final RedisUtil redisUtil;
+    private final Producer springProducer;
+    private final OrderService orderService;
+    private final CommonService commonService;
+    private final DriverService driverService;
 
     @Autowired
-    private RedisUtil redisUtil;
-
-    @Autowired
-    Producer springProducer;
-
-    @Autowired
-    private OrderService orderService;
-
-    @Autowired
-    private CommonService commonService;
-
-    @Autowired
-    private DriverService driverService;
+    public DriverController(MailUtil mailUtil, RedisUtil redisUtil, Producer springProducer, OrderService orderService, CommonService commonService, DriverService driverService) {
+        this.mailUtil = mailUtil;
+        this.redisUtil = redisUtil;
+        this.springProducer = springProducer;
+        this.orderService = orderService;
+        this.commonService = commonService;
+        this.driverService = driverService;
+    }
 
     @PostMapping("login")
     @ApiOperation("驾驶员登录")
@@ -64,6 +63,7 @@ public class DriverController {
         driver.setLoginRule(CommonConstants.DRIVER_ROLE);
         return commonService.login(driver);
     }
+
     @PostMapping("register")
     @ApiOperation("注册驾驶员账号")
     public Result register(@RequestBody UserRegisterDTO userRegisterDTO) {
@@ -98,11 +98,4 @@ public class DriverController {
         return ResponseEntity.ok("MSG SEND SUCCESS");
     }
 
-    @GetMapping("test")
-    public void a() {
-//        redisUtil.expire("sdg", 1000);
-//        System.out.println(CommonConstants.MAIL_SENDER);
-        redisUtil.lock("sgsg", 100);
-//        springProducer.sendMessage(CommonConstants.MQ_ORDER_TOPIC, order, "insert");
-    }
 }
