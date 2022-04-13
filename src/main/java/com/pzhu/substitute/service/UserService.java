@@ -3,6 +3,8 @@ package com.pzhu.substitute.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.pzhu.substitute.common.Result;
 import com.pzhu.substitute.entity.UserInfo;
+import com.pzhu.substitute.entity.dto.UserInfoDTO;
+import com.pzhu.substitute.entity.dto.UserRegisterDTO;
 
 /**
  * @author dengyiqing
@@ -12,14 +14,6 @@ import com.pzhu.substitute.entity.UserInfo;
 public interface UserService extends IService<UserInfo> {
 
     /**
-     *
-     * @param username 用户名
-     * @param password 密码
-     * @return
-     */
-    Result login(String username, String password);
-
-    /**
      * 退出登录
      * @return
      */
@@ -27,18 +21,17 @@ public interface UserService extends IService<UserInfo> {
 
     /**
      * 注册用户
-     * @param username 手机号
-     * @param password 密码
-     * @param code 验证码
+     * @param userRegisterDTO 用户注册的dto
      * @return
      */
-    Result register(String username, String password , String code);
+    Result register(UserRegisterDTO userRegisterDTO);
 
     /**
-     * 发送验证码
-     * @param phoneNum 手机号
+     * 修改用户基本信息
+     * @param userInfoDTO
+     * @param userInfo
      * @return
      */
-    Result createCode(String phoneNum);
+    Result updateBasicUserInfo(UserInfoDTO userInfoDTO, UserInfo userInfo);
 
 }

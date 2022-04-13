@@ -13,4 +13,7 @@ import java.util.List;
 public interface UserMapper extends BaseMapper<UserInfo> {
 
     List<String> queryPermissionsByUserId(Long userId);
+
+
+    int createUserRole(Long id);
 }

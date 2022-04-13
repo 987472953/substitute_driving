@@ -1,17 +1,20 @@
 package com.pzhu.substitute.controller;
 
+import com.pzhu.substitute.common.CommonConstants;
 import com.pzhu.substitute.common.Result;
 import com.pzhu.substitute.common.ResultCode;
 import com.pzhu.substitute.entity.LoginUser;
 import com.pzhu.substitute.entity.UserInfo;
+import com.pzhu.substitute.entity.dto.LoginDTO;
+import com.pzhu.substitute.entity.dto.UserInfoDTO;
+import com.pzhu.substitute.entity.dto.UserRegisterDTO;
+import com.pzhu.substitute.service.CommonService;
 import com.pzhu.substitute.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -25,15 +28,22 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final CommonService commonService;
+
+    public UserController(UserService userService, CommonService commonService) {
+        this.userService = userService;
+        this.commonService = commonService;
+    }
 
     @PostMapping("login")
     @ApiOperation("用户登录")
     public Result login(@ApiParam(name = "用户对象", value = "传入带账号密码的json格式", readOnly = true)
-                        @RequestBody UserInfo user) {
+                        @RequestBody LoginDTO user) {
         log.debug(user.getPhoneNum(), user.getPassword());
-        return userService.login(user.getPhoneNum(), user.getPassword());
+        commonService.checkLoginCode(user.getUuid(), user.getCode());
+        user.setLoginRule(CommonConstants.USER_ROLE);
+        return commonService.login(user);
     }
 
 //    @GetMapping("login")
@@ -44,14 +54,8 @@ public class UserController {
 
     @PostMapping("register")
     @ApiOperation("注册用户")
-    public Result register(String username, String password, String code) {
-        return userService.register(username, password, code);
-    }
-
-    @GetMapping("code")
-    @ApiOperation("获得二维码")
-    public Result code(String phoneNum) {
-        return userService.createCode(phoneNum);
+    public Result register(@RequestBody UserRegisterDTO userRegisterDTO) {
+        return userService.register(userRegisterDTO);
     }
 
     @GetMapping("logout")
@@ -62,16 +66,24 @@ public class UserController {
 
     @GetMapping("detail")
     @ApiOperation("获得用户基本信息")
-    public Result detail() {
-        Authentication authentication = SecurityContextHolder.getContext()
-                .getAuthentication();
+    public Result getDetail(Authentication authentication) {
         Object principal = authentication.getPrincipal();
         if (principal instanceof LoginUser) {
             UserInfo userInfo = ((LoginUser) principal).getUserInfo();
-            return Result.ok().data(userInfo);
+            return Result.ok().data("userInfo", userInfo);
         } else {
             return Result.error(ResultCode.UNAUTHENTICATED);
         }
     }
 
+    @PutMapping("detail")
+    @ApiOperation("修改用户信息")
+    public Result updateDetail(@RequestBody UserInfoDTO userInfoDTO, Authentication authentication) {
+        LoginUser principal = (LoginUser) authentication.getPrincipal();
+        if (principal != null && principal.getUserInfo() != null) {
+            return userService.updateBasicUserInfo(userInfoDTO, principal.getUserInfo());
+        } else {
+            return Result.error(ResultCode.UNAUTHENTICATED);
+        }
+    }
 }

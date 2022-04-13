@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pzhu.substitute.mapper.UserMapper">
+    <insert id="createUserRole">
+        insert into ${prefix}user_role
+        VALUES (#{userId}, (select ${prefix}role.id from ${prefix}role where ${prefix}role.role_key = 'user'));
+    </insert>
     <select id="queryPermissionsByUserId" resultType="java.lang.String">
         SELECT
             DISTINCT ${prefix}menu.perm_key

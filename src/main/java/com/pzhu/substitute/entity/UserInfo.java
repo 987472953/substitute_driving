@@ -28,7 +28,7 @@ public class UserInfo extends Model<DriverInfo> implements Serializable {
      * ID
      */
     @TableId(value = "id", type = IdType.AUTO)
-    @ApiModelProperty("角色名称")
+    @ApiModelProperty("用户ID")
     private Long id;
 
     @ApiModelProperty("微信登录标识")
@@ -51,6 +51,12 @@ public class UserInfo extends Model<DriverInfo> implements Serializable {
 
     @ApiModelProperty(value = "年龄")
     private Integer age;
+
+    @ApiModelProperty(value = "是否被锁定")
+    private Boolean locked;
+
+    @ApiModelProperty(value = "是否被启用")
+    private Boolean enabled;
 
     @ApiModelProperty(value = "创建日期", example = "2020-02-05 13:30:41")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss", iso = DateTimeFormat.ISO.DATE_TIME)
