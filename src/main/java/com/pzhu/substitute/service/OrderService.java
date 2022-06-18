@@ -1,10 +1,11 @@
 package com.pzhu.substitute.service;
 
+import com.alipay.api.AlipayApiException;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.pzhu.substitute.entity.Order;
-import com.pzhu.substitute.entity.UserInfo;
+import com.pzhu.substitute.entity.*;
 import com.pzhu.substitute.entity.dto.OrderDTO;
 import com.pzhu.substitute.entity.dto.OrderPriceDTO;
+import com.pzhu.substitute.entity.dto.PaymentDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -45,12 +46,7 @@ public interface OrderService extends IService<Order> {
      */
     Long createTradeOrder(UserInfo userInfo, OrderDTO orderDTO);
 
-    /**
-     * 查询我的全部订单
-     * @param username
-     * @return
-     */
-    List<Order> queryMyOrders(String username);
+
 
     /**
      * 计算价格
@@ -62,4 +58,32 @@ public interface OrderService extends IService<Order> {
 
     Map<Object, Object> availableOrders();
 
+    /**
+     * 驾驶员接收订单
+     * @param orderId
+     * @param driverInfo
+     * @return
+     */
+    Boolean takeOrder(Long orderId, DriverInfo driverInfo);
+
+    /**
+     * 查询订单的交流
+     * @param orderId
+     * @return
+     */
+    List<Message> queryMessageList(Long orderId);
+
+    /**
+     * 完成订单支付
+     * @param paymentDTO
+     */
+    void completeOrderPayment(PaymentDTO paymentDTO);
+
+    /**
+     * 订单退款
+     * @param orderId
+     * @param userInfo
+     * @return
+     */
+    Double refundOrder(Long orderId, UserInfo userInfo) throws AlipayApiException;
 }

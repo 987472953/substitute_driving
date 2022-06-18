@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author dengyiqing
@@ -21,5 +22,8 @@ public class OrderDTO implements Serializable {
     private String startAddress;
     private String endAddress;
     private Integer distance;
+    private Integer duration;
     private String comment;
+    private Boolean isReservation;
+    private Date appointmentTime;
 }

@@ -9,14 +9,13 @@ import com.baomidou.mybatisplus.annotation.IEnum;
  * @date 2022/2/21
  */
 public enum OrderStatus implements IEnum<Integer> {
-    DRAFT("草稿订单", 0),
+    DRAFT("草稿订单, 待支付", 0),
     CREATED("订单已创建", 1),
-    PUBLISHED("订单已发布", 2),
-    ASSIGNED("订单被分配", 3),
-    COMPLETED("订单已完成", 4),
-    CLOSED("订单已关闭", 5),
-    CANCELLED("订单已取消", 8),
-    PAY_FAIL("支付失败", 9);
+    ASSIGNED("订单被接收", 2),
+    COMPLETED("订单已完成", 3),
+    CLOSED("订单已关闭", 6),
+    CANCELLED("订单已取消", 7),
+    PAY_FAIL("支付失败", 8);
     private String comment;
     private Integer code;
 

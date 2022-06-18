@@ -5,8 +5,9 @@ import com.baomidou.mybatisplus.extension.api.ApiController;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.ImmutableMap;
 import com.pzhu.substitute.common.Result;
-import com.pzhu.substitute.common.ResultCode;
+import com.pzhu.substitute.common.status.ResultCode;
 import com.pzhu.substitute.entity.LoginUser;
+import com.pzhu.substitute.entity.Message;
 import com.pzhu.substitute.entity.Order;
 import com.pzhu.substitute.entity.dto.OrderDTO;
 import com.pzhu.substitute.entity.dto.OrderPriceDTO;
@@ -15,10 +16,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -35,11 +37,16 @@ public class OrderController extends ApiController {
     /**
      * 服务对象
      */
-    @Resource
-    private OrderService orderService;
+    private final OrderService orderService;
+
+    @Autowired
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @PostMapping("calPrice")
-    @ApiOperation("预估价格")
+    @ApiOperation("订单预估价格")
+    @PreAuthorize("hasRole('user')")
     public Result calPrice(@RequestBody OrderPriceDTO orderPriceDTO, Authentication authentication) {
         LoginUser principal = (LoginUser) authentication.getPrincipal();
         String username = principal.getUsername();
@@ -65,40 +72,26 @@ public class OrderController extends ApiController {
         return Result.ok().data("orderId", orderId);
     }
 
-    @GetMapping("iOrders")
-    @ApiOperation("查询我的全部订单")
-    public Result iOrders(Authentication authentication) {
-        LoginUser principal = (LoginUser) authentication.getPrincipal();
-        String username = principal.getUsername();
-        List<Order> orders = orderService.queryMyOrders(username);
-        return Result.ok().data("orders", orders);
-    }
 
-    /**
-     * 分页查询所有数据
-     *
-     * @param page  分页对象
-     * @param order 查询实体
-     * @return 所有数据
-     */
     @GetMapping("/selectAll")
-    @ApiOperation(value = "分页查全部")
+    @ApiOperation(value = "分页查全部订单")
     public Result selectAll(Page<Order> page, @ApiParam Order order) {
         Page<Order> pageInfo = orderService.page(page, new QueryWrapper<>(order));
         return Result.ok().data("pageInfo", pageInfo);
     }
 
-    /**
-     * 通过主键查询单条数据
-     *
-     * @param id 主键
-     * @return 单条数据
-     */
     @GetMapping("{id}")
-    @ApiOperation(value = "根据id查")
-    public Result selectOne(@PathVariable("id") Integer id) {
+    @ApiOperation(value = "根据id查订单信息")
+    public Result selectOne(@PathVariable("id") Long id) {
         Order byId = orderService.getById(id);
         return Result.ok().data("order", byId);
+    }
+
+    @PostMapping("/message/{orderId}")
+    @ApiOperation(value = "根据订单ID查询消息")
+    public Result getOrderMessage(@PathVariable("orderId") Long orderId) {
+        List<Message> messageList = orderService.queryMessageList(orderId);
+        return Result.ok().data("messageList", messageList);
     }
 }
 
