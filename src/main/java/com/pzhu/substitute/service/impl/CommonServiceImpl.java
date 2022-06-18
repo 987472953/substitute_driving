@@ -3,7 +3,7 @@ package com.pzhu.substitute.service.impl;
 import com.pzhu.substitute.common.BizException;
 import com.pzhu.substitute.common.CommonConstants;
 import com.pzhu.substitute.common.Result;
-import com.pzhu.substitute.common.ResultCode;
+import com.pzhu.substitute.common.status.ResultCode;
 import com.pzhu.substitute.entity.DriverInfo;
 import com.pzhu.substitute.entity.LoginDriver;
 import com.pzhu.substitute.entity.LoginUser;
@@ -19,7 +19,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Random;
@@ -33,11 +32,14 @@ import java.util.Random;
 @Slf4j
 public class CommonServiceImpl implements CommonService {
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
+    private final AuthenticationManager authenticationManager;
 
-    @Resource
-    private AuthenticationManager authenticationManager;
+    @Autowired
+    public CommonServiceImpl(RedisUtil redisUtil, AuthenticationManager authenticationManager) {
+        this.redisUtil = redisUtil;
+        this.authenticationManager = authenticationManager;
+    }
 
     @Override
     public Result createCode(String phoneNum) {
@@ -71,24 +73,24 @@ public class CommonServiceImpl implements CommonService {
             throw new BizException(ResultCode.LOGIN_FAIL);
         }
         Object principal = authenticate.getPrincipal();
-        String phoneNum;
+        Long id;
         String role;
         String redisKey;
         if (principal instanceof LoginUser) {
             UserInfo userInfo = ((LoginUser) principal).getUserInfo();
-            phoneNum = userInfo.getPhoneNum();
+            id = userInfo.getId();
             userInfo.setPassword(null);
             role = CommonConstants.USER_ROLE;
-            redisKey = CommonConstants.USER_PREFIX + phoneNum + CommonConstants.LOGIN_SUFFIX;
+            redisKey = CommonConstants.USER_PREFIX + userInfo.getId() + CommonConstants.LOGIN_SUFFIX;
         } else {
             DriverInfo driverInfo = ((LoginDriver) principal).getDriverInfo();
-            phoneNum = driverInfo.getPhoneNum();
+            id = driverInfo.getId();
             driverInfo.setPassword(null);
             role = CommonConstants.DRIVER_ROLE;
-            redisKey = CommonConstants.DRIVER_PREFIX + phoneNum + CommonConstants.LOGIN_SUFFIX;
+            redisKey = CommonConstants.DRIVER_PREFIX + driverInfo.getId() + CommonConstants.LOGIN_SUFFIX;
         }
-        String jwt = JwtUtil.createJWT(CommonConstants.JWT_SALT, 2 * 60 * 60 * 1000, phoneNum, role);
-        log.debug("[用户登录]({})登录成功", phoneNum);
+        String jwt = JwtUtil.createJWT(CommonConstants.JWT_SALT, 2 * 60 * 60 * 1000, id, role);
+        log.debug("[用户登录]({})登录成功", id);
 
         HashMap<Object, Object> map = new HashMap<>();
         map.put("token", jwt);
