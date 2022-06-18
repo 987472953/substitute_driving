@@ -585,6 +585,34 @@ public class RedisUtil {
         }
     }
 
+    public Boolean zSet(String key, Object value, double score) {
+        try {
+            Boolean add = redisTemplate.opsForZSet().add(key, value, score);
+            return add;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Set<Object> zGet(String key, long score) {
+        try {
+            Set<Object> range = redisTemplate.opsForZSet().range(key, score, score);
+            return range;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public Set<Object> zGetAll(String key) {
+        try {
+            Set<Object> range = redisTemplate.opsForZSet().range(key, 0, Long.MAX_VALUE);
+            return range;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     /**
      * 加锁，无阻塞

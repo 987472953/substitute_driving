@@ -4,6 +4,7 @@ import com.pzhu.substitute.common.ConstantPropertiesUtil;
 import com.pzhu.substitute.common.Result;
 import com.pzhu.substitute.service.FileService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +26,20 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 public class OssController {
 
-    @Autowired
-    private FileService fileService;
+    private final FileService fileService;
 
+    @Autowired
+    public OssController(FileService fileService) {
+        this.fileService = fileService;
+    }
 
     @PostMapping("file/upload")
+    @ApiOperation("文件上传")
     public Result upload(
             @ApiParam(name = "file", value = "文件", required = true)
             @RequestParam("file") MultipartFile file,
 
-            @ApiParam(name = "host", value = "文件上传路径", required = false)
+            @ApiParam(name = "host", value = "文件上传路径")
             @RequestParam(value = "host", required = false) String host) {
 
         if (!StringUtils.isEmpty(host)) {

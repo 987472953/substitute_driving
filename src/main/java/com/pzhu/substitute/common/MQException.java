@@ -1,5 +1,7 @@
 package com.pzhu.substitute.common;
 
+import com.pzhu.substitute.common.status.ResultCode;
+
 /**
  * @author dengyiqing
  * @description 自定义业务异常
@@ -22,15 +24,15 @@ public class MQException extends RuntimeException {
     }
 
     public MQException(ResultCode resultCode) {
-        super(resultCode.message);
-        this.errorCode = resultCode.code;
-        this.errorMsg = resultCode.message;
+        super(resultCode.message());
+        this.errorCode = resultCode.code();
+        this.errorMsg = resultCode.message();
     }
 
     public MQException(ResultCode resultCode, Throwable cause) {
-        super(resultCode.message, cause);
-        this.errorCode = resultCode.code;
-        this.errorMsg = resultCode.message;
+        super(resultCode.message(), cause);
+        this.errorCode = resultCode.code();
+        this.errorMsg = resultCode.message();
     }
 
     public MQException(String errorMsg) {

@@ -27,7 +27,7 @@ public class HttpClientUtil {
     public static String doGet(String url, Map<String, String> param) {
         String resultString = "";
         CloseableHttpResponse response = null;
-        try (CloseableHttpClient httpclient = HttpClients.createDefault()){
+        try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
             // 创建uri
             URIBuilder builder = new URIBuilder(url);
             if (param != null) {
@@ -49,13 +49,13 @@ public class HttpClientUtil {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-                if (response != null) {
-                    try {
-                        response.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+            if (response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+            }
         }
         return resultString;
     }

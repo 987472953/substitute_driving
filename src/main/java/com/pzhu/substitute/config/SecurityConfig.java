@@ -56,7 +56,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebM
                 // 都能访问
                 .antMatchers(CommonConstants.REQUEST_RESOURCES_PERMIT_ALL.split(",")).permitAll()
                 // 其他的都需要授权
-                .anyRequest().authenticated();
+                .anyRequest().permitAll();
+//                .anyRequest().authenticated();
 
         log.debug("添加JWT过滤器到过滤链");
         http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);

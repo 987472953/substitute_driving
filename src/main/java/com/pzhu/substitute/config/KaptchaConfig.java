@@ -9,7 +9,7 @@ import java.util.Properties;
 
 /**
  * @author dengyiqing
- * @description Kaptcha配置文件, 验证码
+ * @description Kaptcha配置文件, 图片验证码
  * @date 2022/3/26
  */
 @Component

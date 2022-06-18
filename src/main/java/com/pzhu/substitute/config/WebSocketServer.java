@@ -3,7 +3,12 @@ package com.pzhu.substitute.config;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.pzhu.substitute.common.status.RoleStatus;
+import com.pzhu.substitute.entity.Message;
+import com.pzhu.substitute.mapper.MessageMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
@@ -40,6 +45,12 @@ public class WebSocketServer {
      * 接收userId
      */
     private String userId = "";
+
+    private static ApplicationContext applicationContext;
+
+    public static void setApplicationContext(ApplicationContext context) {
+        applicationContext = context;
+    }
 
     /**
      * 连接建立成功调用的方法
@@ -93,19 +104,40 @@ public class WebSocketServer {
         //消息保存到数据库、redis
         Gson gson = new Gson();
         if (StringUtils.isNotBlank(message)) {
+            Message msgInfo;
             try {
                 //解析发送的报文
                 JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
                 //追加发送人(防止串改)
-                jsonObject.addProperty("fromUserId", this.userId);
-                String toUserId = jsonObject.get("toUserId").getAsString();
-                //传送给对应toUserId用户的websocket
-                if (StringUtils.isNotBlank(toUserId) && webSocketMap.containsKey(toUserId)) {
-                    webSocketMap.get(toUserId).sendMessage(jsonObject.getAsString());
-                } else {
-                    log.error("请求的userId:" + toUserId + "不在该服务器上");
-                    //否则不在这个服务器上，发送到mysql或者redis
+                jsonObject.addProperty("from", userId);
+                jsonObject.addProperty("createTime", new DateTime().toString("yyyy-MM-dd HH:mm:ss"));
+                String orderId = jsonObject.get("orderId").getAsString();
+                String msg = jsonObject.get("msg").getAsString();
+                String type = jsonObject.get("type").getAsString();
+                if ("driverTakeOrder".equals(type)) {
+                    String userId = jsonObject.get("userId").getAsString();
+                    jsonObject.addProperty("driverId", userId.substring(1));
+                    webSocketMap.get("U"+userId).sendMessage(gson.toJson(jsonObject));
+                } else if ("Umsg".equals(type)) {
+                    String driverId = "D" + jsonObject.get("driverId").getAsString();
+                    jsonObject.addProperty("roleStatus", RoleStatus.USER.getValue());
+                    msgInfo = new Message(null, Long.parseLong(orderId), RoleStatus.USER, msg, null);
+                    if (StringUtils.isNotBlank(driverId) && webSocketMap.containsKey(driverId)) {
+                        webSocketMap.get(driverId).sendMessage(gson.toJson(jsonObject));
+                    }
+                    MessageMapper bean = applicationContext.getBean(MessageMapper.class);
+                    bean.insert(msgInfo);
+                } else if ("Dmsg".equals(type)) {
+                    String userId = "U" + jsonObject.get("userId").getAsString();
+                    jsonObject.addProperty("roleStatus", RoleStatus.DRIVER.getValue());
+                    msgInfo = new Message(null, Long.parseLong(orderId), RoleStatus.DRIVER, msg, null);
+                    if (StringUtils.isNotBlank(userId) && webSocketMap.containsKey(userId)) {
+                        webSocketMap.get(userId).sendMessage(gson.toJson(jsonObject));
+                    }
+                    MessageMapper bean = applicationContext.getBean(MessageMapper.class);
+                    bean.insert(msgInfo);
                 }
+
             } catch (Exception e) {
                 e.printStackTrace();
             }

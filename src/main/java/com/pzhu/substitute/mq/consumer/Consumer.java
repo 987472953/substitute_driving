@@ -27,7 +27,7 @@ public class Consumer implements RocketMQListener<Order> {
         // 更新订单到redis缓存
         log.debug("[消息队列]消费消息, message: {}", message);
 //        for (int i = 0; i < 5; i++) {
-//            if (redisUtil.hset(CommonConstants.ORDER_LIST, message.getId().toString(), message)) {
+//            if (redisUtil.zSet(CommonConstants.ORDER_LIST, message, message.getId().doubleValue())) {
 //                WebSocketServer.sendAllMessage(new Gson().toJson(ImmutableMap.of("insert", message)));
 //                break;
 //            } else if (i == 4) {

@@ -2,7 +2,7 @@ package com.pzhu.substitute.filter;
 
 import com.pzhu.substitute.common.BizException;
 import com.pzhu.substitute.common.CommonConstants;
-import com.pzhu.substitute.common.ResultCode;
+import com.pzhu.substitute.common.status.ResultCode;
 import com.pzhu.substitute.utils.JwtUtil;
 import com.pzhu.substitute.utils.RedisUtil;
 import io.jsonwebtoken.Claims;
@@ -42,12 +42,15 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             return;
         }
         Claims claims = JwtUtil.parseJWT(CommonConstants.JWT_SALT, authentication);
-        String phoneNum = claims.getSubject();
+        String id = claims.getSubject();
         String redisKey;
-        if (CommonConstants.USER_ROLE.equals(claims.get("role"))) {
-            redisKey = CommonConstants.USER_PREFIX + phoneNum + CommonConstants.LOGIN_SUFFIX;
+        if (CommonConstants.ADMIN_ROLE.equals(claims.get("role"))) {
+            filterChain.doFilter(request, response);
+            return;
+        } else if (CommonConstants.USER_ROLE.equals(claims.get("role"))) {
+            redisKey = CommonConstants.USER_PREFIX + id + CommonConstants.LOGIN_SUFFIX;
         } else {
-            redisKey = CommonConstants.DRIVER_PREFIX + phoneNum + CommonConstants.LOGIN_SUFFIX;
+            redisKey = CommonConstants.DRIVER_PREFIX + id + CommonConstants.LOGIN_SUFFIX;
         }
         UserDetails login = (UserDetails) redisUtil.get(redisKey);
         if (Objects.isNull(login)) {

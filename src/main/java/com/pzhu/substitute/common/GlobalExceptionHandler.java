@@ -1,10 +1,12 @@
 package com.pzhu.substitute.common;
 
+import com.pzhu.substitute.common.status.ResultCode;
 import com.pzhu.substitute.utils.MailUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
@@ -25,18 +27,16 @@ import java.util.Date;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @Autowired
-    private MailUtil mailUtil;
-
+    private final MailUtil mailUtil;
     private Date email_limit_date;
 
+    @Autowired
+    public GlobalExceptionHandler(MailUtil mailUtil) {
+        this.mailUtil = mailUtil;
+    }
 
     /**
      * 处理自定义的业务异常
-     *
-     * @param req
-     * @param e
-     * @return
      */
     @ExceptionHandler(value = BizException.class)
     @ResponseBody
@@ -46,11 +46,17 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 处理自定义的业务异常
+     */
+    @ExceptionHandler(value = AccessDeniedException.class)
+    @ResponseBody
+    public Result bizExceptionHandler(HttpServletRequest req, AccessDeniedException e) {
+        log.error("发生业务异常！原因是：{}", e.getMessage());
+        return Result.error(4001, e.getMessage());
+    }
+
+    /**
      * 处理空指针的异常
-     *
-     * @param req
-     * @param e
-     * @return
      */
     @ExceptionHandler(value = NullPointerException.class)
     @ResponseBody
@@ -61,10 +67,6 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理用户登录过期
-     *
-     * @param req
-     * @param e
-     * @return
      */
     @ExceptionHandler(value = ExpiredJwtException.class)
     @ResponseBody
@@ -75,10 +77,6 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理用户被禁用
-     *
-     * @param req
-     * @param e
-     * @return
      */
     @ExceptionHandler(value = DisabledException.class)
     @ResponseBody
@@ -90,10 +88,6 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理用户被锁定
-     *
-     * @param req
-     * @param e
-     * @return
      */
     @ExceptionHandler(value = LockedException.class)
     @ResponseBody
@@ -104,10 +98,6 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理密码错误
-     *
-     * @param req
-     * @param e
-     * @return
      */
     @ExceptionHandler(value = BadCredentialsException.class)
     @ResponseBody
@@ -118,10 +108,6 @@ public class GlobalExceptionHandler {
 
     /**
      * Redis连接异常
-     *
-     * @param req
-     * @param e
-     * @return
      */
     @ExceptionHandler(value = RedisConnectionFailureException.class)
     @ResponseBody
@@ -132,10 +118,6 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理其他异常
-     *
-     * @param req
-     * @param e
-     * @return
      */
     @ExceptionHandler(value = Exception.class)
     @ResponseBody
@@ -146,16 +128,11 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理MQ异常
-     *
-     * @param req
-     * @param e
-     * @return
      */
     @ExceptionHandler(value = MQException.class)
     @ResponseBody
     public Result exceptionHandler(HttpServletRequest req, MQException e) {
-        if (email_limit_date == null ||
-                new Date().getTime() - email_limit_date.getTime() > 30 * 60 * 1000) {
+        if (email_limit_date == null || new Date().getTime() - email_limit_date.getTime() > 30 * 60 * 1000) {
             email_limit_date = new Date();
             String infoText = "MQ消息队列 发生异常\nmessage: [%s]\ncause: [%s]\nstackTrace: \n%s";
             String format = String.format(infoText, e.getMessage(), e.getCause(), Arrays.toString(e.getStackTrace()));
