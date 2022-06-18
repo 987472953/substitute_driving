@@ -1,5 +1,6 @@
 package com.pzhu.substitute.common;
 
+import com.pzhu.substitute.common.status.ResultCode;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -19,15 +20,15 @@ public class Result {
     private Map<Object, Object> data = new HashMap<>();// 返回数据
 
     public Result(ResultCode code) {
-        this.success = code.success;
-        this.code = code.code;
-        this.message = code.message;
+        this.success = code.success();
+        this.code = code.code();
+        this.message = code.message();
     }
 
     public Result(ResultCode code, Map<Object, Object> data) {
-        this.success = code.success;
-        this.code = code.code;
-        this.message = code.message;
+        this.success = code.success();
+        this.code = code.code();
+        this.message = code.message();
         this.data = data;
     }
 

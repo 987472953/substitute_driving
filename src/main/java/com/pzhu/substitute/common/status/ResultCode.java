@@ -1,4 +1,4 @@
-package com.pzhu.substitute.common;
+package com.pzhu.substitute.common.status;
 
 /**
  * @author dengyiqing
@@ -28,6 +28,7 @@ public enum ResultCode {
     INTERNAL_SERVER_ERROR(false, 5000, "服务器内部错误!"),
     REDIS_ERROR(false, 5001, "服务器缓存异常!"),
     ORDER_EXPIRED(false, 4006, "订单过期"),
+    ORDER_ERROR(false, 4006, "订单问题"),
     MQ_FAILED_CONSUME_MESSAGE(false, 40016, "消费者消息失败");
 
     //---用户操作返回码----
