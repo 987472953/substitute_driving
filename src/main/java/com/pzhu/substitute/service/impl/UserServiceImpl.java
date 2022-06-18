@@ -5,11 +5,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.pzhu.substitute.common.BizException;
 import com.pzhu.substitute.common.CommonConstants;
 import com.pzhu.substitute.common.Result;
-import com.pzhu.substitute.common.ResultCode;
-import com.pzhu.substitute.entity.LoginUser;
-import com.pzhu.substitute.entity.UserInfo;
+import com.pzhu.substitute.common.status.OrderStatus;
+import com.pzhu.substitute.common.status.ResultCode;
+import com.pzhu.substitute.common.status.RoleStatus;
+import com.pzhu.substitute.entity.*;
 import com.pzhu.substitute.entity.dto.UserInfoDTO;
 import com.pzhu.substitute.entity.dto.UserRegisterDTO;
+import com.pzhu.substitute.mapper.DriverMapper;
+import com.pzhu.substitute.mapper.OrderCommentMapper;
+import com.pzhu.substitute.mapper.OrderMapper;
 import com.pzhu.substitute.mapper.UserMapper;
 import com.pzhu.substitute.service.CommonService;
 import com.pzhu.substitute.service.UserService;
@@ -25,7 +29,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author dengyiqing
@@ -36,28 +41,34 @@ import javax.annotation.Resource;
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implements UserService {
 
-    @Resource
-    private UserMapper userMapper;
-
-    @Resource
-    private AuthenticationManager authenticationManager;
-
-    @Resource
-    private RedisUtil redisUtil;
-
-    @Resource
-    private PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
+    private final AuthenticationManager authenticationManager;
+    private final RedisUtil redisUtil;
+    private final PasswordEncoder passwordEncoder;
+    private final CommonService commonService;
+    private final OrderMapper orderMapper;
+    private final OrderCommentMapper orderCommentMapper;
+    private final DriverMapper driverMapper;
 
     @Autowired
-    private CommonService commonService;
+    public UserServiceImpl(UserMapper userMapper, AuthenticationManager authenticationManager, RedisUtil redisUtil, PasswordEncoder passwordEncoder, CommonService commonService, OrderMapper orderMapper, OrderCommentMapper orderCommentMapper, DriverMapper driverMapper) {
+        this.userMapper = userMapper;
+        this.authenticationManager = authenticationManager;
+        this.redisUtil = redisUtil;
+        this.passwordEncoder = passwordEncoder;
+        this.commonService = commonService;
+        this.orderMapper = orderMapper;
+        this.orderCommentMapper = orderCommentMapper;
+        this.driverMapper = driverMapper;
+    }
 
     @Override
     public Result logout() {
         log.debug("[退出登录]获得SecurityContext中的用户Id");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
-        String phoneNum = loginUser.getUserInfo().getPhoneNum();
-        String redisKey = CommonConstants.USER_PREFIX + phoneNum + CommonConstants.LOGIN_SUFFIX;
+        Long id = loginUser.getUserInfo().getId();
+        String redisKey = CommonConstants.USER_PREFIX + id + CommonConstants.LOGIN_SUFFIX;
         redisUtil.del(redisKey);
         return Result.ok().message("成功退出登录");
     }
@@ -67,7 +78,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
     public Result register(UserRegisterDTO userRegisterDTO) {
         String phoneNum = userRegisterDTO.getPhoneNum();
         if (!MyUtil.checkIsNotNull(phoneNum, userRegisterDTO.getPassword(), userRegisterDTO.getVerify()) ||
-                userRegisterDTO.getPassword().equals(userRegisterDTO.getConfirmPassword())) {
+                !userRegisterDTO.getPassword().equals(userRegisterDTO.getConfirmPassword())) {
             throw new BizException(ResultCode.BODY_NOT_MATCH);
         }
 
@@ -109,7 +120,76 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         BeanUtils.copyProperties(userInfoDTO, updateUser);
         updateUser.setId(userInfo.getId());
         int i = userMapper.updateById(updateUser);
+        UserInfo newUserInfo = userMapper.selectById(userInfo.getId());
+        String redisKey = CommonConstants.USER_PREFIX + userInfo.getId() + CommonConstants.LOGIN_SUFFIX;
+        LoginUser loginUser = (LoginUser) redisUtil.get(redisKey);
+        loginUser.setUserInfo(newUserInfo);
+        redisUtil.set(redisKey, loginUser);
         return Result.ok().data("successfulUpdates", i);
+    }
+
+    @Override
+    public Result queryIOrders(UserInfo userInfo) {
+        Long id = userInfo.getId();
+        LambdaQueryWrapper<Order> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Order::getUserId, id);
+        List<Order> orders = orderMapper.selectList(wrapper);
+        return Result.ok().data("orderList", orders);
+    }
+
+    @Override
+    public Result commentOrder(Long orderId, String comment) {
+        Order order = orderMapper.selectById(orderId);
+        if (order.getOrderStatus() != OrderStatus.COMPLETED) {
+            throw new BizException(ResultCode.ORDER_ERROR).setErrorMsg("订单状态问题");
+        }
+        Integer integer = orderCommentMapper.selectCount(new LambdaQueryWrapper<OrderComment>().eq(OrderComment::getOrderId, orderId));
+        OrderComment orderComment = new OrderComment(null, orderId, integer + 1, comment, RoleStatus.USER, null);
+        int insert = orderCommentMapper.insert(orderComment);
+        return insert == 1 ? Result.ok() : Result.error();
+    }
+
+    @Override
+    public Result queryOrderDriver(Long orderId, UserInfo userInfo) {
+        Order order = orderMapper.selectById(orderId);
+        if (Objects.isNull(order)) {
+            throw new BizException(ResultCode.ORDER_ERROR).setErrorMsg("订单号错误");
+        }
+        if (!userInfo.getId().equals(order.getUserId())) {
+            throw new BizException(ResultCode.ORDER_ERROR).setErrorMsg("这不是您的订单");
+        }
+        DriverInfo driverInfo = driverMapper.selectById(order.getDriverId());
+        return Result.ok().data("driverInfo", driverInfo);
+    }
+
+    @Override
+    public Order queryUserOrderById(Long orderId, UserInfo userInfo) {
+
+        Order order = orderMapper.selectById(orderId);
+        if (Objects.isNull(order)) {
+            throw new BizException(ResultCode.ORDER_ERROR).setErrorMsg("订单不存在");
+        }
+        if (!Objects.equals(order.getUserId(), userInfo.getId())) {
+            throw new BizException(ResultCode.UNAUTHORISE);
+        }
+        return order;
+    }
+
+    @Override
+    public Result queryOrderComment(Long orderId, UserInfo userInfo) {
+        //todo 判断该订单是否为该用户的
+        LambdaQueryWrapper<OrderComment> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(OrderComment::getOrderId, orderId).orderByAsc(OrderComment::getCreateTime);
+        List<OrderComment> commentList = orderCommentMapper.selectList(wrapper);
+        return Result.ok().data("commentList", commentList);
+    }
+
+    @Override
+    public Result queryNowOrder(UserInfo userInfo) {
+        LambdaQueryWrapper<Order> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Order::getUserId, userInfo.getId()).lt(Order::getOrderStatus, OrderStatus.COMPLETED);
+        Order order = orderMapper.selectOne(wrapper);
+        return Result.ok().data("nowOrder", order);
     }
 
 }

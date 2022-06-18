@@ -9,12 +9,12 @@ import com.pzhu.substitute.entity.UserInfo;
 import com.pzhu.substitute.mapper.DriverMapper;
 import com.pzhu.substitute.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -26,11 +26,14 @@ import java.util.List;
 @Service
 public class UserDetailsServiceImpl<T> implements UserDetailsService {
 
-    @Resource
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
+    private final DriverMapper driverMapper;
 
-    @Resource
-    private DriverMapper driverMapper;
+    @Autowired
+    public UserDetailsServiceImpl(UserMapper userMapper, DriverMapper driverMapper) {
+        this.userMapper = userMapper;
+        this.driverMapper = driverMapper;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -45,6 +48,7 @@ public class UserDetailsServiceImpl<T> implements UserDetailsService {
             wrapper.eq(DriverInfo::getPhoneNum, username);
             DriverInfo driverInfo = driverMapper.selectOne(wrapper);
             List<String> permissions = driverMapper.queryPermissionsByDriverId(driverInfo.getId());
+
             return new LoginDriver(driverInfo, permissions);
         } else {
             LambdaQueryWrapper<UserInfo> wrapper = new LambdaQueryWrapper<>();

@@ -16,6 +16,8 @@ public class LoginDTO {
     @ApiModelProperty("登录密码")
     private String password;
 
+    private String username;
+
     private String uuid;
     private String code;
     private String loginRule;

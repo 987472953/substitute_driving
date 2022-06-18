@@ -6,16 +6,21 @@
         VALUES (#{userId}, (select ${prefix}role.id from ${prefix}role where ${prefix}role.role_key = 'user'));
     </insert>
     <select id="queryPermissionsByUserId" resultType="java.lang.String">
-        SELECT
-            DISTINCT ${prefix}menu.perm_key
-        FROM
-            ${prefix}user_role
-                LEFT JOIN ${prefix}role ON ${prefix}role.id = ${prefix}user_role.role_id
-                LEFT JOIN ${prefix}role_menu ON ${prefix}user_role.role_id = ${prefix}role_menu.role_id
-                LEFT JOIN ${prefix}menu ON ${prefix}menu.id = ${prefix}role_menu.menu_id
-        WHERE
-            ${prefix}user_role.user_id = #{userId}
-          AND ${prefix}role.status = 1
-          AND ${prefix}menu.status = 1
+        SELECT DISTINCT ${prefix}menu.perm_key
+        FROM ${prefix}user_role
+                 LEFT JOIN ${prefix}role ON ${prefix}role.id = ${prefix}user_role.role_id
+                 LEFT JOIN ${prefix}role_menu ON ${prefix}user_role.role_id = ${prefix}role_menu.role_id
+                 LEFT JOIN ${prefix}menu ON ${prefix}menu.id = ${prefix}role_menu.menu_id
+        WHERE ${prefix}user_role.user_id = #{userId}
+          AND ${prefix}role.`status` = 1
+          AND ${prefix}menu.`status` = 1
+        UNION
+        SELECT DISTINCT CONCAT('ROLE_', ${prefix}role.role_key)
+        FROM ${prefix}user_role
+                 LEFT JOIN ${prefix}role ON ${prefix}user_role.role_id = ${prefix}role.id
+        WHERE ${prefix}user_role.user_id = #{userId}
+          AND ${prefix}role.`status` = 1
     </select>
+
+
 </mapper>

@@ -57,7 +57,7 @@ public class LoginDriver implements UserDetails {
         return driverInfo.getPhoneNum();
     }
 
-    public DriverInfo getUserInfo() {
+    public DriverInfo getDriverInfo() {
         return driverInfo;
     }
 
