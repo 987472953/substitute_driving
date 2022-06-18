@@ -2,16 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pzhu.substitute.mapper.DriverMapper">
     <select id="queryPermissionsByDriverId" resultType="java.lang.String">
-        SELECT
-            DISTINCT ${prefix}menu.perm_key
-        FROM
-            ${prefix}pzhu_user_role
-                LEFT JOIN ${prefix}role ON ${prefix}role.id = ${prefix}driver_role.role_id
-                LEFT JOIN ${prefix}role_menu ON ${prefix}driver_role.role_id = ${prefix}role_menu.role_id
-                LEFT JOIN ${prefix}menu ON ${prefix}menu.id = ${prefix}role_menu.menu_id
-        WHERE
-            ${prefix}driver_role.driver_id = #{driverId}
+        SELECT DISTINCT ${prefix}menu.perm_key
+        FROM ${prefix}driver_role
+                 LEFT JOIN ${prefix}role ON ${prefix}role.id = ${prefix}driver_role.role_id
+                 LEFT JOIN ${prefix}role_menu ON ${prefix}driver_role.role_id = ${prefix}role_menu.role_id
+                 LEFT JOIN ${prefix}menu ON ${prefix}menu.id = ${prefix}role_menu.menu_id
+        WHERE ${prefix}driver_role.driver_id = #{driverId}
           AND ${prefix}role.`status` = 1
           AND ${prefix}menu.`status` = 1
+        UNION
+        SELECT DISTINCT CONCAT('ROLE_' , ${prefix}role.role_key)
+        FROM ${prefix}driver_role
+                 LEFT JOIN ${prefix}role ON ${prefix}driver_role.role_id = ${prefix}role.id
+        WHERE ${prefix}driver_role.driver_id = #{userId}
+          AND ${prefix}role.`status` = 1
     </select>
 </mapper>
